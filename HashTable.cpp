@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits.h>
 #include "HashTable.h"
 
 // Function to check if the given number is a prime number
@@ -83,6 +84,61 @@ void HashTable::displayTable()
     }
 }
 
+// Function to perform the RapinKarp algorithm to find matching strings
+int HashTable::RabinKarp(std::string pattern, std::string text, int q, int d)
+{
+    int m = pattern.length();
+    int n = text.length();
+
+    int i, j, p = 0, t = 0, h = 1;
+
+    for(i = 0; i < m; ++i)
+        h = (h * d) % q;
+
+    // Calculate the hash value of pattern and text
+    for(i = 0; i < m; ++i)
+    {
+        p = (d * p + pattern[i]) % q;
+        t = (d * t + text[i]) % q;
+    }
+
+    // Find the match string
+    for(i = 0; i <= n - m; ++i)
+    {
+        // Case both hash value match
+        if(p == t)
+        {
+            // Start to compare 2 string
+            for(j = 0; j < m; ++j)
+            {
+                if(text[i + j] != pattern[j])
+                    break;
+            }
+
+            if(j == m)
+                return i + 1;
+        }
+
+        if(i < n - m)
+        {
+            t = (d * (t - text[i] * h) + text[i + m]) % q;
+            if(t < 0)
+                t += q;
+        }
+    }
+    return INT_MIN;
+}
+
+// Function for user to call the Rabin-Karp algorithm
+void HashTable::RabinKarp(std::string pattern, std::string text)
+{
+    int pos = RabinKarp(pattern, text, INT_MAX, 256);
+    if(pos != INT_MIN)
+        std::cout<<"\nString "<<pattern<<" is found in "<<text<<" at position "<<pos<<std::endl;
+    else
+        std::cout<<"\nString "<<pattern<<" is not found in "<<text<<std::endl;
+}
+
 int main()
 {
     HashTable ht(10);
@@ -107,6 +163,9 @@ int main()
 
     // Display the hash table once again
     ht.displayTable();
+
+    // Rabin Karp algorithm
+    ht.RabinKarp("GEEK", "GEEKS FOR GEEKS");
 
     return 0;
 }
